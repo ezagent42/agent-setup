@@ -15,7 +15,12 @@
 ### 新项目
 
 ```bash
+# 个人账号下创建
 gh repo create my-project --template ezagent42/agent-setup --public --clone
+
+# 在组织下创建（指定 org/repo）
+gh repo create my-org/my-project --template ezagent42/agent-setup --public --clone
+
 cd my-project
 ./claude.sh
 ```
