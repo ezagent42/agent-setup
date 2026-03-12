@@ -25,7 +25,7 @@ error() { echo -e "${RED}[agent-setup]${NC} $*" >&2; }
 clone_template() {
   local tmpdir
   tmpdir=$(mktemp -d)
-  info "Cloning template from $TEMPLATE_REPO..."
+  info "Cloning template from $TEMPLATE_REPO..." >&2
   git clone --depth 1 "$TEMPLATE_REPO" "$tmpdir" 2>/dev/null
   echo "$tmpdir"
 }
