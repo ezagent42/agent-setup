@@ -59,7 +59,7 @@ if [ "$SETUP_CHANGED" = true ] && [ -n "$SKILL_LINES" ]; then
     [ -z "$line" ] && continue
     # Each line becomes: pnpm dlx skills add <args> --agent claude-code -y
     # Redirect all output away from stdout to avoid corrupting hook JSON
-    if ! pnpm dlx skills add $line --agent claude-code -y >/dev/null 2>&1; then
+    if ! pnpm dlx skills add $line --agent claude-code -y </dev/null >/dev/null 2>&1; then
       INSTALL_ERRORS="${INSTALL_ERRORS}\nFailed to install: $line"
     fi
   done <<< "$SKILL_LINES"
