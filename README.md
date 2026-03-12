@@ -15,7 +15,7 @@
 ### 新项目
 
 ```bash
-gh repo create my-project --template ezagent42/agent-setup --clone
+gh repo create my-project --template ezagent42/agent-setup --public --clone
 cd my-project
 ./claude.sh
 ```
