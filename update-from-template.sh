@@ -231,6 +231,12 @@ do_init() {
     info "  mcp.json already exists, skipping"
   fi
 
+  # .mcp.env.example → always overwrite (template may add new keys)
+  if [ -f "$TEMPLATE_DIR/.mcp.env.example" ]; then
+    copy_file "$TEMPLATE_DIR/.mcp.env.example" "$PROJECT_DIR/.mcp.env.example"
+    info "  Updated .mcp.env.example"
+  fi
+
   # .claude/skills/* → bundled skills, only if not exists (skip symlinks)
   if [ -d "$TEMPLATE_DIR/.claude/skills" ]; then
     for skill_dir in "$TEMPLATE_DIR"/.claude/skills/*/; do
@@ -375,6 +381,13 @@ do_update() {
   if [ -f "$TEMPLATE_DIR/.claude/mcp.json" ] && [ ! -f "$PROJECT_DIR/.claude/mcp.json" ]; then
     copy_file "$TEMPLATE_DIR/.claude/mcp.json" "$PROJECT_DIR/.claude/mcp.json"
     info "  Created: .claude/mcp.json"
+    UPDATED=$((UPDATED + 1))
+  fi
+
+  # .mcp.env.example: always overwrite (template may add new keys)
+  if [ -f "$TEMPLATE_DIR/.mcp.env.example" ]; then
+    copy_file "$TEMPLATE_DIR/.mcp.env.example" "$PROJECT_DIR/.mcp.env.example"
+    info "  Updated: .mcp.env.example"
     UPDATED=$((UPDATED + 1))
   fi
 
