@@ -477,9 +477,15 @@ do_update() {
     done
   fi
 
-  # Update checksums + version
+  # Update checksums + version (before calling agent-setup.sh to prevent recursion)
   compute_checksums "$TEMPLATE_DIR" "$CHECKSUMS_FILE"
   save_template_version "$TEMPLATE_DIR"
+
+  # Run agent-setup hook to merge AGENT_SETUP.md entries and install new skills/packages
+  if [ -f "$PROJECT_DIR/AGENT_SETUP.md" ]; then
+    info "Running agent-setup to apply changes..."
+    CLAUDE_PROJECT_DIR="$PROJECT_DIR" "$PROJECT_DIR/.claude/hooks/agent-setup.sh" >/dev/null 2>&1 || true
+  fi
 
   echo ""
   info "Update complete. $UPDATED file(s) updated."

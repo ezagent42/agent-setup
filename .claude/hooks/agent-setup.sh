@@ -110,23 +110,34 @@ EOF
   exit 0
 fi
 
-# --- 1.5. Auto-merge template AGENT_SETUP.md ---
-# Fetches the template's AGENT_SETUP.md when the template repo has new commits,
-# then additively merges any new entries into the local file.
+# --- 1.5. Auto-update infrastructure + merge AGENT_SETUP.md ---
+# When the template repo has new commits:
+#   a) Run update-from-template.sh to update hooks/scripts (so this file self-updates)
+#   b) Additively merge new Skills/Tools/Packages entries into local AGENT_SETUP.md
 if [ -f "$VERSION_FILE" ]; then
   LOCAL_SHA=$(cat "$VERSION_FILE")
   REMOTE_SHA=$(git ls-remote "$TEMPLATE_REPO" refs/heads/main 2>/dev/null | cut -f1 || true)
   if [ -n "$REMOTE_SHA" ] && [ "$REMOTE_SHA" != "$LOCAL_SHA" ]; then
+    # a) Update infrastructure (hooks, scripts, bundled skills)
+    UPDATER="${CLAUDE_PROJECT_DIR}/update-from-template.sh"
+    if [ -x "$UPDATER" ]; then
+      "$UPDATER" >/dev/null 2>&1 || true
+    fi
+
+    # b) Merge AGENT_SETUP.md entries (additive only)
     TPL_TMP=$(mktemp)
     if curl -sfL "$TEMPLATE_RAW_URL" -o "$TPL_TMP" 2>/dev/null; then
       merge_section "Skills" "$TPL_TMP" "$SETUP_FILE"
       merge_section "Tools" "$TPL_TMP" "$SETUP_FILE"
       merge_section "Packages" "$TPL_TMP" "$SETUP_FILE"
-      echo "$REMOTE_SHA" > "$VERSION_FILE"
     else
       WARNINGS="${WARNINGS}\nTemplate merge: could not fetch remote AGENT_SETUP.md"
     fi
     rm -f "$TPL_TMP"
+
+    # update-from-template.sh already saves .template-version,
+    # but write it again in case the updater was missing or failed
+    echo "$REMOTE_SHA" > "$VERSION_FILE"
   fi
 fi
 
