@@ -216,6 +216,14 @@ do_init() {
   copy_file "$TEMPLATE_DIR/.claude/RTK.md" "$PROJECT_DIR/.claude/RTK.md"
   info "  Updated RTK.md"
 
+  # .claude/mcp.json → only if not exists (users add their own MCP servers)
+  if [ ! -f "$PROJECT_DIR/.claude/mcp.json" ]; then
+    copy_file "$TEMPLATE_DIR/.claude/mcp.json" "$PROJECT_DIR/.claude/mcp.json"
+    info "  Created mcp.json"
+  else
+    info "  mcp.json already exists, skipping"
+  fi
+
   # --- 3. Merge settings.json ---
   info "Merging settings.json..."
   if command -v jq &>/dev/null; then

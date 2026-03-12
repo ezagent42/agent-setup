@@ -81,6 +81,17 @@ export HTTP_PROXY=http://127.0.0.1:7897
 export HTTPS_PROXY=http://127.0.0.1:7897
 ```
 
+### `.mcp.env`（MCP 服务器密钥）
+
+MCP 服务器的 API 密钥等敏感信息放在 `.mcp.env` 中（已 gitignore），`claude.sh` 启动时会自动加载：
+
+```bash
+# .mcp.env 示例
+CONTEXT7_API_KEY=your-api-key-here
+```
+
+MCP 服务器配置在 `.claude/mcp.json` 中定义。模板默认包含 [Context7](https://github.com/upstash/context7) 文档查询服务。如需添加其他 MCP 服务器，直接编辑 `mcp.json`。
+
 ### 项目特定 hooks
 
 在 `.claude/settings.json` 中添加你自己的 hooks。更新脚本会保留所有项目特定的条目（Stop hooks、自定义 PreToolUse hooks 等）。
@@ -102,6 +113,7 @@ agent-setup/
 ├── update-from-template.sh         # 从模板初始化/更新
 ├── .claude/
 │   ├── settings.json               # Hooks 配置
+│   ├── mcp.json                    # MCP 服务器配置
 │   ├── hooks/
 │   │   ├── agent-setup.sh          # 核心：解析 AGENT_SETUP.md，安装 skills，检查 tools
 │   │   ├── inject-superpowers.sh   # 注入 using-superpowers 上下文
