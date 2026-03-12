@@ -1,5 +1,7 @@
 # Skills CLI runtime (restored on session start)
 .agents/
+.agents/package-hooks/
+.agents/packages/
 
 # User-local launcher overrides
 claude.local.sh
