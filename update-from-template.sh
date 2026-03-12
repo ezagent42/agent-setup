@@ -30,6 +30,18 @@ clone_template() {
   echo "$tmpdir"
 }
 
+# --- Save template version (commit SHA) ---
+save_template_version() {
+  local template_dir="$1"
+  local version_file="$PROJECT_DIR/.claude/.template-version"
+  local sha
+  sha=$(git -C "$template_dir" rev-parse HEAD 2>/dev/null || true)
+  if [ -n "$sha" ]; then
+    echo "$sha" > "$version_file"
+    info "  Saved template version: ${sha:0:7}"
+  fi
+}
+
 # --- Compute checksums of template files ---
 compute_checksums() {
   local template_dir="$1"
@@ -319,10 +331,15 @@ do_init() {
     echo '.claude/.template-checksums' >> "$PROJECT_DIR/.gitignore"
     info "  Added .claude/.template-checksums to .gitignore"
   fi
+  if ! grep -qF '.claude/.template-version' "$PROJECT_DIR/.gitignore" 2>/dev/null; then
+    echo '.claude/.template-version' >> "$PROJECT_DIR/.gitignore"
+    info "  Added .claude/.template-version to .gitignore"
+  fi
 
-  # --- 5. Save template checksums ---
+  # --- 5. Save template checksums + version ---
   compute_checksums "$TEMPLATE_DIR" "$CHECKSUMS_FILE"
   info "  Saved template checksums"
+  save_template_version "$TEMPLATE_DIR"
 
   # --- 6. Install skills ---
   info "Installing skills from AGENT_SETUP.md..."
@@ -460,8 +477,9 @@ do_update() {
     done
   fi
 
-  # Update checksums
+  # Update checksums + version
   compute_checksums "$TEMPLATE_DIR" "$CHECKSUMS_FILE"
+  save_template_version "$TEMPLATE_DIR"
 
   echo ""
   info "Update complete. $UPDATED file(s) updated."

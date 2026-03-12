@@ -7,5 +7,6 @@ claude.local.sh
 # MCP server secrets (API keys, tokens)
 .mcp.env
 
-# Template checksums (managed by update-from-template.sh)
+# Template state (managed by update-from-template.sh)
 .claude/.template-checksums
+.claude/.template-version
