@@ -1,0 +1,5 @@
+{
+  "name": "agent-setup",
+  "description": "Claude Code project bootstrapper — hooks, commands, and a marketplace for curated plugins",
+  "author": "ezagent42"
+}
