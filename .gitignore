@@ -1,14 +1,8 @@
-# Skills CLI runtime (restored on session start)
+# Agent Setup runtime (gitignored)
 .agents/
-.agents/package-hooks/
-.agents/packages/
 
 # User-local launcher overrides
 claude.local.sh
 
 # MCP server secrets (API keys, tokens)
 .mcp.env
-
-# Template state (managed by update-from-template.sh)
-.claude/.template-checksums
-.claude/.template-version
