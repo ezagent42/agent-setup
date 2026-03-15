@@ -72,10 +72,33 @@ fi
 # Agent Setup plugin bootstrap
 # ============================================
 
-if ! claude plugin list 2>/dev/null | grep -q "agent-setup@agent-setup"; then
+AGENT_SETUP_MARKETPLACE="https://github.com/ezagent42/agent-setup"
+
+# Register marketplace if not already registered
+if ! grep -q '"agent-setup"' "$HOME/.claude/plugins/known_marketplaces.json" 2>/dev/null; then
+    echo "📦 Registering agent-setup marketplace..."
+    claude plugin marketplace add "$AGENT_SETUP_MARKETPLACE" 2>/dev/null || {
+        echo "⚠️  Could not register marketplace. Run manually:"
+        echo "  claude plugin marketplace add $AGENT_SETUP_MARKETPLACE"
+    }
+fi
+
+# Install plugin if not installed for this project
+PLUGIN_INSTALLED=false
+if [ -f "$HOME/.claude/plugins/installed_plugins.json" ]; then
+    PLUGIN_INSTALLED=$(python3 -c "
+import json, sys
+d = json.load(open('$HOME/.claude/plugins/installed_plugins.json'))
+entries = d.get('plugins', {}).get('agent-setup@agent-setup', [])
+print('true' if any(e.get('projectPath') == '$SCRIPT_DIR' for e in entries) else 'false')
+" 2>/dev/null || echo "false")
+fi
+
+if [ "$PLUGIN_INSTALLED" != "true" ]; then
     echo "📦 Installing agent-setup plugin..."
     claude plugin install agent-setup@agent-setup --scope project 2>/dev/null || {
         echo "⚠️  Could not install agent-setup plugin. Run manually:"
+        echo "  claude plugin marketplace add $AGENT_SETUP_MARKETPLACE"
         echo "  claude plugin install agent-setup@agent-setup --scope project"
     }
     echo ""
