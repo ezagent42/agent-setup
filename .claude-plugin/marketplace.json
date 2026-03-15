@@ -1,29 +1,71 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "agent-setup",
+  "description": "Claude Code project bootstrapper — hooks, commands, and a marketplace for curated plugins",
+  "owner": {
+    "name": "ezagent42",
+    "email": "ezagent42@users.noreply.github.com"
+  },
   "plugins": [
     {
       "name": "agent-setup",
       "description": "Core plugin — hooks, commands, and project setup",
-      "source": "./"
+      "version": "1.0.0",
+      "author": {
+        "name": "ezagent42",
+        "email": "ezagent42@users.noreply.github.com"
+      },
+      "source": "./",
+      "category": "utilities",
+      "homepage": "https://github.com/ezagent42/agent-setup"
     },
     {
       "name": "superpowers",
       "description": "Skills for brainstorming, planning, TDD, debugging, and more",
-      "source": { "source": "url", "url": "https://github.com/obra/superpowers" }
+      "version": "1.0.0",
+      "author": {
+        "name": "obra",
+        "email": "jesse@fsck.com"
+      },
+      "source": { "source": "url", "url": "https://github.com/obra/superpowers" },
+      "category": "skills",
+      "homepage": "https://github.com/obra/superpowers"
     },
     {
       "name": "impeccable",
       "description": "Design quality skills for frontend interfaces",
-      "source": { "source": "url", "url": "https://github.com/pbakaus/impeccable" }
+      "version": "1.0.0",
+      "author": {
+        "name": "pbakaus",
+        "email": "pbakaus@users.noreply.github.com"
+      },
+      "source": { "source": "url", "url": "https://github.com/pbakaus/impeccable" },
+      "category": "skills",
+      "homepage": "https://github.com/pbakaus/impeccable"
     },
     {
       "name": "product-manager-skills",
       "description": "Product management skills (wrapped from deanpeters/Product-Manager-Skills)",
-      "source": "./wrappers/product-manager-skills"
+      "version": "1.0.0",
+      "author": {
+        "name": "deanpeters",
+        "email": "deanpeters@users.noreply.github.com"
+      },
+      "source": "./wrappers/product-manager-skills",
+      "category": "skills",
+      "homepage": "https://github.com/deanpeters/Product-Manager-Skills"
     },
     {
       "name": "agent-browser",
       "description": "Browser automation CLI for AI agents",
-      "source": { "source": "url", "url": "https://github.com/vercel-labs/agent-browser" }
+      "version": "1.0.0",
+      "author": {
+        "name": "vercel-labs",
+        "email": "vercel-labs@users.noreply.github.com"
+      },
+      "source": { "source": "url", "url": "https://github.com/vercel-labs/agent-browser" },
+      "category": "skills",
+      "homepage": "https://github.com/vercel-labs/agent-browser"
     }
   ]
 }
