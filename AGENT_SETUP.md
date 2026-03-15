@@ -8,7 +8,7 @@ Edit this file to add/remove dependencies. Changes are applied on next session s
 <!-- Each line: <source> [-s <name>]... -->
 <!-- Without -s flags, all skills from the source are installed -->
 - obra/superpowers
-- anthropics/claude-plugins-official -s skill-creator -s claude-md-improver -s claude-automation-recommender
+- anthropics/claude-plugins-official -s claude-md-improver -s claude-automation-recommender
 - vercel-labs/agent-browser -s agent-browser
 - deanpeters/Product-Manager-Skills
 - pbakaus/impeccable
@@ -18,6 +18,13 @@ Edit this file to add/remove dependencies. Changes are applied on next session s
 <!-- Each line: <command> | <install-hint> -->
 - rtk | cargo install rtk-ai || see https://github.com/rtk-ai/rtk
 - uv | curl -LsSf https://astral.sh/uv/install.sh | sh
+
+## Plugins
+
+<!-- Each line: <name>@<marketplace> — installed via claude plugin install -->
+- skill-creator@claude-plugins-official
+- playground@claude-plugins-official
+- hookify@claude-plugins-official
 
 ## Packages
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# SessionStart hook — reads AGENT_SETUP.md, ensures skills, tools, and packages are installed.
+# SessionStart hook — reads AGENT_SETUP.md, ensures skills, tools, plugins, and packages are installed.
 # Idempotent: re-running on already-installed items simply overwrites them.
 # Uses hash-based change detection to skip install when AGENT_SETUP.md is unchanged.
 set -euo pipefail
 
 SETUP_FILE="${CLAUDE_PROJECT_DIR}/AGENT_SETUP.md"
 HASH_FILE="${CLAUDE_PROJECT_DIR}/.agents/.last-setup-hash"
+PLUGIN_HASH_FILE="${CLAUDE_PROJECT_DIR}/.agents/.last-plugin-hash"
 PKG_HASH_FILE="${CLAUDE_PROJECT_DIR}/.agents/.last-package-hash"
 VERSION_FILE="${CLAUDE_PROJECT_DIR}/.claude/.template-version"
 TEMPLATE_REPO="https://github.com/ezagent42/agent-setup.git"
@@ -132,6 +133,7 @@ if [ -n "$REMOTE_SHA" ] && [ "$REMOTE_SHA" != "$LOCAL_SHA" ]; then
   if curl -sfL "$TEMPLATE_RAW_URL" -o "$TPL_TMP" 2>/dev/null; then
     merge_section "Skills" "$TPL_TMP" "$SETUP_FILE"
     merge_section "Tools" "$TPL_TMP" "$SETUP_FILE"
+    merge_section "Plugins" "$TPL_TMP" "$SETUP_FILE"
     merge_section "Packages" "$TPL_TMP" "$SETUP_FILE"
   else
     WARNINGS="${WARNINGS}\nTemplate merge: could not fetch remote AGENT_SETUP.md"
@@ -152,7 +154,11 @@ SKILL_LINES=$(echo "$SKILLS_SECTION" | grep '^- ' | sed 's/^- //' || true)
 TOOLS_SECTION=$(awk '/^## Tools$/{found=1;next} /^## /{found=0} found{print}' "$SETUP_FILE")
 TOOL_LINES=$(echo "$TOOLS_SECTION" | grep '^- ' | sed 's/^- //' || true)
 
-# --- 3.5. Parse ## Packages section ---
+# --- 3.5. Parse ## Plugins section ---
+PLUGINS_SECTION=$(awk '/^## Plugins$/{found=1;next} /^## /{found=0} found{print}' "$SETUP_FILE")
+PLUGIN_LINES=$(echo "$PLUGINS_SECTION" | grep '^- ' | sed 's/^- //' || true)
+
+# --- 3.6. Parse ## Packages section ---
 PACKAGES_SECTION=$(awk '/^## Packages$/{found=1;next} /^## /{found=0} found{print}' "$SETUP_FILE")
 PACKAGE_LINES=$(echo "$PACKAGES_SECTION" | grep '^- ' | sed 's/^- //' || true)
 
@@ -168,7 +174,19 @@ if [ "$CURRENT_HASH" != "$STORED_HASH" ]; then
   SETUP_CHANGED=true
 fi
 
-# --- 4.5. Hash-based change detection (packages) ---
+# --- 4.5. Hash-based change detection (plugins) ---
+PLUGIN_CURRENT_HASH=$(echo "$PLUGIN_LINES" | shasum -a 256 | cut -d' ' -f1)
+PLUGIN_STORED_HASH=""
+if [ -f "$PLUGIN_HASH_FILE" ]; then
+  PLUGIN_STORED_HASH=$(cat "$PLUGIN_HASH_FILE")
+fi
+
+PLUGIN_CHANGED=false
+if [ "$PLUGIN_CURRENT_HASH" != "$PLUGIN_STORED_HASH" ]; then
+  PLUGIN_CHANGED=true
+fi
+
+# --- 4.6. Hash-based change detection (packages) ---
 PKG_CURRENT_HASH=$(echo "$PACKAGE_LINES" | shasum -a 256 | cut -d' ' -f1)
 PKG_STORED_HASH=""
 if [ -f "$PKG_HASH_FILE" ]; then
@@ -209,7 +227,25 @@ if [ -n "$TOOL_LINES" ]; then
   done <<< "$TOOL_LINES"
 fi
 
-# --- 7.5. Install packages if changed ---
+# --- 7.5. Install plugins if changed ---
+if [ "$PLUGIN_CHANGED" = true ] && [ -n "$PLUGIN_LINES" ]; then
+  if command -v claude &>/dev/null; then
+    while IFS= read -r line; do
+      [ -z "$line" ] && continue
+      if ! claude plugin install "$line" --scope project </dev/null >/dev/null 2>&1; then
+        INSTALL_ERRORS="${INSTALL_ERRORS}\nFailed to install plugin: $line"
+      fi
+    done <<< "$PLUGIN_LINES"
+  else
+    WARNINGS="${WARNINGS}\nClaude CLI not found — cannot install plugins"
+  fi
+
+  # Update plugin hash
+  mkdir -p "$(dirname "$PLUGIN_HASH_FILE")"
+  echo "$PLUGIN_CURRENT_HASH" > "$PLUGIN_HASH_FILE"
+fi
+
+# --- 7.6. Install packages if changed ---
 if [ "$PKG_CHANGED" = true ] && [ -n "$PACKAGE_LINES" ]; then
   INSTALLER="${CLAUDE_PROJECT_DIR}/.claude/hooks/install-package.sh"
   if [ -x "$INSTALLER" ]; then
@@ -231,6 +267,9 @@ fi
 # --- 8. Output JSON ---
 ANYTHING_CHANGED=false
 if [ "$SETUP_CHANGED" = true ] && [ -n "$SKILL_LINES" ]; then
+  ANYTHING_CHANGED=true
+fi
+if [ "$PLUGIN_CHANGED" = true ] && [ -n "$PLUGIN_LINES" ]; then
   ANYTHING_CHANGED=true
 fi
 if [ "$PKG_CHANGED" = true ] && [ -n "$PACKAGE_LINES" ]; then
